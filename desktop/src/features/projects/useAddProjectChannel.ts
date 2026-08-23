@@ -145,12 +145,15 @@ export async function addProjectChannel(
         projectCreatedAt = publication.event.created_at;
       }
     } catch (error) {
-      if (isUnsupportedProjectKindError(error)) {
-        throw new Error(
-          "This relay does not support projects yet, so the channel could not be linked.",
-        );
-      }
-      throw error;
+      await removeCreatedChannelAndThrow(
+        isUnsupportedProjectKindError(error)
+          ? new Error(
+              "This relay does not support projects yet, so the channel could not be linked.",
+            )
+          : error instanceof Error
+            ? error
+            : new Error("Could not link the channel to this project."),
+      );
     }
   }
 

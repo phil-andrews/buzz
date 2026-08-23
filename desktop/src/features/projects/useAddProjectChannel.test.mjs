@@ -116,3 +116,29 @@ test("addProjectChannel removes its channel and does not publish when the projec
   assert.deepEqual(deleted, [CREATED_CHANNEL]);
   assert.equal(publishCalls, 0);
 });
+
+test("addProjectChannel removes its channel when project publication fails", async () => {
+  const liveHead = makeLiveHead(100);
+  const deleted = [];
+  let fetchCalls = 0;
+
+  await assert.rejects(
+    addProjectChannel(input(), {
+      applyAgents: async () => {},
+      applyCanvas: async () => {},
+      createChannel: async () => ({ id: CREATED_CHANNEL }),
+      deleteChannel: async (channelId) => deleted.push(channelId),
+      fetchEvents: async () => {
+        fetchCalls += 1;
+        return [liveHead];
+      },
+      publishOwnerAnnouncement: async () => {
+        throw new Error("publication failed");
+      },
+    }),
+    /publication failed/,
+  );
+
+  assert.equal(fetchCalls, 2);
+  assert.deepEqual(deleted, [CREATED_CHANNEL]);
+});
