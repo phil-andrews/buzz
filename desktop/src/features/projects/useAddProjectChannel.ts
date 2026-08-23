@@ -53,13 +53,6 @@ export async function addProjectChannel(
     publishOwnerAnnouncement = publishProjectOwnerAnnouncement,
   } = deps;
   const targetOwner = input.project.owner.toLowerCase();
-  const channel = await createChannel({
-    channelType: "stream",
-    description: input.description,
-    name: input.name,
-    ttlSeconds: input.ttlSeconds,
-    visibility: input.visibility,
-  });
 
   const liveHeads = await fetchEvents({
     authors: [targetOwner],
@@ -78,6 +71,14 @@ export async function addProjectChannel(
       "This project was updated by another session while you were working. Refresh and try again.",
     );
   }
+
+  const channel = await createChannel({
+    channelType: "stream",
+    description: input.description,
+    name: input.name,
+    ttlSeconds: input.ttlSeconds,
+    visibility: input.visibility,
+  });
 
   const templates = buildProjectRelatedChannelPatchTemplate({
     channelId: channel.id,
