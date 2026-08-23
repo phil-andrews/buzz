@@ -4,6 +4,7 @@ import test from "node:test";
 import { addProjectChannel } from "./useAddProjectChannel.ts";
 
 const OWNER = "a".repeat(64);
+const CREATED_CHANNEL = "22222222-2222-4222-8222-222222222222";
 
 function makeProject(overrides = {}) {
   return {
@@ -25,7 +26,7 @@ function makeProject(overrides = {}) {
   };
 }
 
-function makeLiveHead(createdAt) {
+function makeLiveHead(createdAt, overrides = {}) {
   return {
     id: "f".repeat(64),
     kind: 30621,
@@ -34,6 +35,7 @@ function makeLiveHead(createdAt) {
     content: "",
     tags: [["d", "platform"]],
     sig: "0".repeat(128),
+    ...overrides,
   };
 }
 
@@ -81,4 +83,36 @@ test("addProjectChannel does not create a channel when the live project head is 
     /Could not find this project on the relay/,
   );
   assert.equal(harness.createCalls(), 0);
+});
+
+test("addProjectChannel removes its channel and does not publish when the project changes during creation", async () => {
+  const originalHead = makeLiveHead(100);
+  const concurrentHead = makeLiveHead(101, {
+    id: "e".repeat(64),
+    tags: [
+      ["d", "platform"],
+      ["buzz-related-channel", "33333333-3333-4333-8333-333333333333"],
+    ],
+  });
+  const fetchResults = [[originalHead], [concurrentHead]];
+  const deleted = [];
+  let publishCalls = 0;
+
+  await assert.rejects(
+    addProjectChannel(input(), {
+      applyAgents: async () => {},
+      applyCanvas: async () => {},
+      createChannel: async () => ({ id: CREATED_CHANNEL }),
+      deleteChannel: async (channelId) => deleted.push(channelId),
+      fetchEvents: async () => fetchResults.shift() ?? [],
+      publishOwnerAnnouncement: async () => {
+        publishCalls += 1;
+        throw new Error("must not publish a stale project replacement");
+      },
+    }),
+    /updated by another session while the channel was being created/,
+  );
+
+  assert.deepEqual(deleted, [CREATED_CHANNEL]);
+  assert.equal(publishCalls, 0);
 });
