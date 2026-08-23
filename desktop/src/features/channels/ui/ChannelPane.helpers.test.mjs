@@ -15,21 +15,30 @@ function channel(overrides = {}) {
   };
 }
 
-test("focus idle drawers yield to an open thread surface", () => {
+test("focus idle drawers yield to every higher-priority auxiliary surface", () => {
   const idleDrawer = {
+    channelManagementOpen: false,
+    hasAgentSession: false,
     hasIdleAuxiliaryPanel: true,
     hasIdlePanelCloseHandler: true,
+    hasProfilePanel: false,
+    hasThreadSurface: false,
     useSplitAuxiliaryPane: true,
   };
 
-  assert.equal(
-    shouldUseFocusIdleDrawer({ ...idleDrawer, hasThreadSurface: false }),
-    true,
-  );
-  assert.equal(
-    shouldUseFocusIdleDrawer({ ...idleDrawer, hasThreadSurface: true }),
-    false,
-  );
+  assert.equal(shouldUseFocusIdleDrawer(idleDrawer), true);
+  for (const surface of [
+    "channelManagementOpen",
+    "hasAgentSession",
+    "hasProfilePanel",
+    "hasThreadSurface",
+  ]) {
+    assert.equal(
+      shouldUseFocusIdleDrawer({ ...idleDrawer, [surface]: true }),
+      false,
+      `idle drawer must yield when ${surface} is open`,
+    );
+  }
 });
 
 test("getChannelIntroKind names project homes ahead of regular streams", () => {

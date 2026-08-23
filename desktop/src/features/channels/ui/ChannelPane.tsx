@@ -467,12 +467,23 @@ export const ChannelPane = React.memo(function ChannelPane({
     threadViewMode === "focus" &&
     useSplitAuxiliaryPane &&
     (Boolean(threadHeadMessage) || shouldShowThreadSkeleton);
-  const hasThreadSurface =
-    Boolean(threadHeadMessage) || shouldShowThreadSkeleton;
+  const selectedAgent = React.useMemo(
+    () =>
+      agentSessionSelection.resolveSelectedAgentSession({
+        agentSessionAgents,
+        openAgentSessionPubkey,
+        profilePanelPubkey,
+        profiles,
+      }),
+    [agentSessionAgents, openAgentSessionPubkey, profilePanelPubkey, profiles],
+  );
   const useFocusIdleDrawer = shouldUseFocusIdleDrawer({
+    channelManagementOpen,
+    hasAgentSession: Boolean(activeChannel && selectedAgent),
     hasIdleAuxiliaryPanel: Boolean(idleAuxiliaryPanel),
-    hasThreadSurface,
     hasIdlePanelCloseHandler: Boolean(onCloseIdleAuxiliaryPanel),
+    hasProfilePanel: Boolean(profilePanelPubkey),
+    hasThreadSurface: Boolean(threadHeadMessage) || shouldShowThreadSkeleton,
     useSplitAuxiliaryPane,
   });
   const { channelIsCovered, markExitComplete } = useFocusDrawerPresence(
@@ -488,16 +499,6 @@ export const ChannelPane = React.memo(function ChannelPane({
       onExternalTargetResolved: onThreadScrollTargetResolved,
       onModeChange: markExitComplete,
     });
-  const selectedAgent = React.useMemo(
-    () =>
-      agentSessionSelection.resolveSelectedAgentSession({
-        agentSessionAgents,
-        openAgentSessionPubkey,
-        profilePanelPubkey,
-        profiles,
-      }),
-    [agentSessionAgents, openAgentSessionPubkey, profilePanelPubkey, profiles],
-  );
   const hasSplitAuxiliaryPane =
     useSplitAuxiliaryPane &&
     (channelManagementOpen ||

@@ -4,18 +4,27 @@ import type { Channel } from "@/shared/api/types";
 import { KIND_SYSTEM_MESSAGE } from "@/shared/constants/kinds";
 
 export function shouldUseFocusIdleDrawer({
+  channelManagementOpen,
+  hasAgentSession,
   hasIdleAuxiliaryPanel,
-  hasThreadSurface,
   hasIdlePanelCloseHandler,
+  hasProfilePanel,
+  hasThreadSurface,
   useSplitAuxiliaryPane,
 }: {
+  channelManagementOpen: boolean;
+  hasAgentSession: boolean;
   hasIdleAuxiliaryPanel: boolean;
-  hasThreadSurface: boolean;
   hasIdlePanelCloseHandler: boolean;
+  hasProfilePanel: boolean;
+  hasThreadSurface: boolean;
   useSplitAuxiliaryPane: boolean;
 }): boolean {
   return (
     useSplitAuxiliaryPane &&
+    !channelManagementOpen &&
+    !hasAgentSession &&
+    !hasProfilePanel &&
     !hasThreadSurface &&
     hasIdleAuxiliaryPanel &&
     hasIdlePanelCloseHandler
