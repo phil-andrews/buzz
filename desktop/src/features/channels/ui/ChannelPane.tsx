@@ -45,7 +45,10 @@ import {
   WelcomeComposerGuidanceLayer,
 } from "@/features/channels/ui/WelcomeComposerBanner";
 import { useWelcomeComposerBanner } from "@/features/channels/ui/useWelcomeComposerBanner";
-import { mentionsKnownAgent } from "@/features/channels/ui/ChannelPane.helpers";
+import {
+  mentionsKnownAgent,
+  shouldUseFocusIdleDrawer,
+} from "@/features/channels/ui/ChannelPane.helpers";
 import { HuddleStartingView, HuddleTranscriptIntro } from "@/features/huddle";
 import { ChannelGlyph } from "@/features/channels/ui/ChannelGlyph";
 import { useChannelIntro } from "@/features/channels/ui/useChannelIntro";
@@ -464,10 +467,14 @@ export const ChannelPane = React.memo(function ChannelPane({
     threadViewMode === "focus" &&
     useSplitAuxiliaryPane &&
     (Boolean(threadHeadMessage) || shouldShowThreadSkeleton);
-  const useFocusIdleDrawer =
-    useSplitAuxiliaryPane &&
-    Boolean(idleAuxiliaryPanel) &&
-    Boolean(onCloseIdleAuxiliaryPanel);
+  const hasThreadSurface =
+    Boolean(threadHeadMessage) || shouldShowThreadSkeleton;
+  const useFocusIdleDrawer = shouldUseFocusIdleDrawer({
+    hasIdleAuxiliaryPanel: Boolean(idleAuxiliaryPanel),
+    hasThreadSurface,
+    hasIdlePanelCloseHandler: Boolean(onCloseIdleAuxiliaryPanel),
+    useSplitAuxiliaryPane,
+  });
   const { channelIsCovered, markExitComplete } = useFocusDrawerPresence(
     useFocusThreadDrawer || useFocusIdleDrawer,
     useFocusThreadDrawer

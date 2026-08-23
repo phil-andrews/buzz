@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getChannelIntroKind } from "./ChannelPane.helpers.ts";
+import {
+  getChannelIntroKind,
+  shouldUseFocusIdleDrawer,
+} from "./ChannelPane.helpers.ts";
 
 function channel(overrides = {}) {
   return {
@@ -11,6 +14,23 @@ function channel(overrides = {}) {
     ...overrides,
   };
 }
+
+test("focus idle drawers yield to an open thread surface", () => {
+  const idleDrawer = {
+    hasIdleAuxiliaryPanel: true,
+    hasIdlePanelCloseHandler: true,
+    useSplitAuxiliaryPane: true,
+  };
+
+  assert.equal(
+    shouldUseFocusIdleDrawer({ ...idleDrawer, hasThreadSurface: false }),
+    true,
+  );
+  assert.equal(
+    shouldUseFocusIdleDrawer({ ...idleDrawer, hasThreadSurface: true }),
+    false,
+  );
+});
 
 test("getChannelIntroKind names project homes ahead of regular streams", () => {
   assert.equal(getChannelIntroKind(channel(), true), "project channel");
