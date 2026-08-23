@@ -46,6 +46,7 @@ import {
   refineRepoUnavailableReason,
 } from "@/features/projects/lib/projectRepoAvailability";
 import { wantsProjectRepositorySurface } from "@/features/projects/lib/projectDetailSearch";
+import { hasAuthoritativeHomeBinding } from "@/features/projects/lib/projectHomeChannel";
 import { selectProjectRepository } from "@/features/projects/projectModels";
 import { ProjectSelectionProvider } from "@/features/projects/lib/useProjectSelection";
 import { useMemberChannelIds } from "@/features/projects/useRepositoryAccess";
@@ -676,7 +677,7 @@ export function ProjectDetailScreen(props: ProjectDetailScreenProps) {
     );
   }
   const showChannelHome =
-    Boolean(project.projectChannelId) &&
+    hasAuthoritativeHomeBinding(project) &&
     !wantsProjectRepositorySurface({
       commitHash,
       issueId,

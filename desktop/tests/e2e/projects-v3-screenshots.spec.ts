@@ -61,7 +61,6 @@ async function openBuzzProject(page: import("@playwright/test").Page) {
     .first();
   await expect(projectEntry).toBeVisible({ timeout: 10_000 });
   await projectEntry.click();
-  await page.getByTestId("project-home-context-repo-buzz").click();
 }
 
 test("projects activity overview screenshot", async ({ page }) => {
@@ -315,10 +314,8 @@ test("projects v3 workspace screenshot states", async ({ page }) => {
   await expect(backButton).toBeVisible();
   await expect(page.getByTestId("app-sidebar")).toBeVisible();
   await expect(projectDetailScroll).toHaveCSS("overscroll-behavior-y", "none");
-  await expect(page.getByRole("tab", { name: "Tasks" })).toHaveAttribute(
-    "data-state",
-    "active",
-  );
+  await filesTab.click();
+  await expect(filesTab).toHaveAttribute("data-state", "active");
   const [projectDetailScrollBounds, initialTabMenuBounds] = await Promise.all([
     projectDetailScroll.boundingBox(),
     tabMenu.boundingBox(),
@@ -651,7 +648,7 @@ test("projects v3 workspace screenshot states", async ({ page }) => {
   await expect(agentChatPanel.getByTestId("message-composer")).toBeVisible();
   const agentContext = agentChatPanel.getByTestId("project-agent-context");
   await expect(agentContext).toBeVisible();
-  await expect(agentContext).toContainText("Overview");
+  await expect(agentContext).toContainText("Files");
   await expect(agentContext).not.toContainText("Buzz /");
   // The context rail reveals the chat panel with a width transition; measure
   // only after it settles or the panel's unclipped box overhangs the rail.
@@ -817,7 +814,7 @@ test("projects v3 workspace screenshot states", async ({ page }) => {
   ).toHaveCount(0);
   await expect(
     workspacePanel.getByTestId("project-section-header-icon"),
-  ).toHaveCount(0);
+  ).toHaveCount(1);
   await waitForAnimations(page);
   await page.screenshot({ path: `${SHOTS}/01-workspace-overview.png` });
 
